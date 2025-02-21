@@ -6,10 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/books")
@@ -57,6 +61,28 @@ public class BookController {
     public List<Book> findByPublishedDateAfter(
             @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
         return bookService.findByPublishedDateAfter(date);
+    }
+
+    @GetMapping(value = "/csv", produces = "text/csv")
+    public void downloadCsv(HttpServletResponse response) throws IOException {
+        response.setHeader("Content-Disposition", "attachment; filename=books.csv");
+        
+        List<Book> books = bookService.findAll();
+        
+        try (CSVPrinter csvPrinter = new CSVPrinter(response.getWriter(), CSVFormat.DEFAULT
+                .builder()
+                .setHeader("ID", "Title", "Price", "Publish Date")
+                .build())) {
+                
+            for (Book book : books) {
+                csvPrinter.printRecord(
+                    book.getId(),
+                    book.getTitle(),
+                    book.getPrice(),
+                    book.getPublishDate()
+                );
+            }
+        }
     }
 
 }
