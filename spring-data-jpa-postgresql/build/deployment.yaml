@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-java
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: hello-java
+  template:
+    metadata:
+      labels:
+        app: hello-java
+    spec:
+      containers:
+      - image: us-central1-docker.pkg.dev/analog-octagon-451406-v0/codelabrepo/hello-java:v6
+        name: hello-java
+        ports:
+        - containerPort: 8080
